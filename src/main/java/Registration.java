@@ -1,5 +1,6 @@
 
 import jakarta.ejb.EJB;
+import EJB.UserBean;
 import org.bson.Document;
 
 
@@ -15,7 +16,7 @@ import java.io.PrintWriter;
 @WebServlet(name = "Registration", value = "/registration")
 public class Registration extends HttpServlet {
     @EJB
-    RegistrationBean registrationBean;
+    UserBean registrationBean;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

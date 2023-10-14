@@ -1,4 +1,5 @@
 import Objects.Book;
+import EJB.BookBean;
 import com.google.gson.Gson;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
