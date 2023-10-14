@@ -33,7 +33,7 @@
                         if (data.length > 0) {
                             var temp = "<option disabled selected>Select a user</option>";
                             data.forEach((itemData) => {
-                                temp += "<option>" + itemData.BookTitle + " - " + itemData.Author + "</option>";
+                                temp += "<option>" + itemData.Name + " - (" + itemData.Email + ")</option>";
                             });
                             document.getElementById('users').innerHTML = temp;
                         }
