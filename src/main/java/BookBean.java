@@ -2,6 +2,8 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import static com.mongodb.client.model.Filters.eq;
+import com.mongodb.client.model.Sorts;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import org.bson.Document;
@@ -40,7 +42,7 @@ public class BookBean {
         MongoDatabase db = mongo.getDatabase("library");
         // Get customers
         MongoCollection<Document> books = db.getCollection("books");
-        FindIterable<Document> foundBooks = books.find();
+        FindIterable<Document> foundBooks = books.find(eq("OnLoan", false));
         return foundBooks;
     }
 }

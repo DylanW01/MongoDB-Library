@@ -10,7 +10,7 @@
     <title>Library - Loan a book</title>
     <!-- Get Books -->
     <script>
-        fetch("http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/books").then(
+        fetch("http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/books/available").then(
             res => {
                 res.json().then(
                     data => {
