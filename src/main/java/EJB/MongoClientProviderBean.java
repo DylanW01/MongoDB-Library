@@ -1,3 +1,5 @@
+package EJB;
+
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import jakarta.annotation.PostConstruct;

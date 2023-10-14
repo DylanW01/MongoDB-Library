@@ -1,5 +1,4 @@
 
-import com.mongodb.client.*;
 import jakarta.ejb.EJB;
 import org.bson.Document;
 

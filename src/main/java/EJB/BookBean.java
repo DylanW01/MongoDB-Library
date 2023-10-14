@@ -1,9 +1,11 @@
+package EJB;
+
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import static com.mongodb.client.model.Filters.eq;
-import com.mongodb.client.model.Sorts;
+
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import org.bson.Document;
