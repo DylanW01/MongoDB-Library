@@ -10,6 +10,21 @@
     <title>Library - Loan a book</title>
     <!-- Get Books -->
     <script>
+        fetch("http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/users").then(
+            res => {
+                res.json().then(
+                    data => {
+                        if (data.length > 0) {
+                            var temp = "<option disabled selected>Select a user</option>";
+                            data.forEach((itemData) => {
+                                temp += "<option value='"+itemData.Id+"'>" + itemData.Name + " - (" + itemData.Email + ")</option>";
+                            });
+                            document.getElementById('users').innerHTML = temp;
+                        }
+                    }
+                )
+            }
+        )
         fetch("http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/books/available").then(
             res => {
                 res.json().then(
@@ -17,25 +32,9 @@
                         if (data.length > 0) {
                             var temp = "<option disabled selected>Select a book</option>";
                             data.forEach((itemData) => {
-                                temp += "<option>" + itemData.BookTitle + " - " + itemData.Author + "</option>";
+                                temp += "<option value='"+itemData.Id+"'>" + itemData.BookTitle + " - " + itemData.Author + "</option>";
                             });
                             document.getElementById('books').innerHTML = temp;
-                        }
-                    }
-                )
-            }
-        )
-        fetch("http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/users").then(
-            res => {
-                res.json().then(
-                    data => {
-                        console.log(data);
-                        if (data.length > 0) {
-                            var temp = "<option disabled selected>Select a user</option>";
-                            data.forEach((itemData) => {
-                                temp += "<option>" + itemData.Name + " - (" + itemData.Email + ")</option>";
-                            });
-                            document.getElementById('users').innerHTML = temp;
                         }
                     }
                 )
@@ -59,15 +58,18 @@
                         <h6 class="m-0 font-weight-bold text-primary">New Loan</h6>
                     </div>
                     <div class="card-body">
-                        <form action="/MongoDB-Library-1.0-SNAPSHOT/loans/new" method="post">
+                        <form action="/MongoDB-Library-1.0-SNAPSHOT/loans" method="post">
                             <div class="form-group">
-                                <select id="users">
+                                <select required name="users" id="users">
                                 </select>
                             </div>
                             <div class="form-group">
-                                <select id="books">
+                                <select required name="books" id="books">
                                 </select>
                             </div>
+                            <button type="submit" style="width: 25%" class="btn btn-primary btn-block">
+                                Loan Book
+                            </button>
                         </form>
                     </div>
                 </div>

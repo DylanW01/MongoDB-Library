@@ -9,6 +9,7 @@ import static com.mongodb.client.model.Filters.eq;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 @Stateless(name = "BookEJB")
 public class BookBean {
@@ -38,13 +39,34 @@ public class BookBean {
     }
 
     public FindIterable<Document> getAvailableBooks() {
-        // Client
         MongoClient mongo = mongoClientProviderBean.getMongoClient();
-        // Get DB
         MongoDatabase db = mongo.getDatabase("library");
-        // Get customers
         MongoCollection<Document> books = db.getCollection("books");
+
         FindIterable<Document> foundBooks = books.find(eq("OnLoan", false));
+
         return foundBooks;
+    }
+
+    public void markAsBorrowed(String bookIdString) {
+        MongoClient mongo = mongoClientProviderBean.getMongoClient();
+        MongoDatabase db = mongo.getDatabase("library");
+        MongoCollection<Document> books = db.getCollection("books");
+
+        Document filter = new Document("_id", new ObjectId(bookIdString));
+        Document update = new Document("$set", new Document("OnLoan", true));
+
+        books.updateOne(filter, update);
+    }
+
+    public void markAsReturned(String bookIdString) {
+        MongoClient mongo = mongoClientProviderBean.getMongoClient();
+        MongoDatabase db = mongo.getDatabase("library");
+        MongoCollection<Document> books = db.getCollection("books");
+
+        Document filter = new Document("_id", new ObjectId(bookIdString));
+        Document update = new Document("$set", new Document("OnLoan", false));
+
+        books.updateOne(filter, update);
     }
 }

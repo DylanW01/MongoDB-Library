@@ -36,7 +36,7 @@ public class bookListing extends HttpServlet {
                 Document doc = cursor.next();
 
                 Book book = new Book(
-                        (ObjectId) doc.get("_id"),
+                        doc.get("_id").toString(),
                         doc.get("Title").toString(),
                         doc.get("Author").toString(),
                         doc.get("ISBN").toString(),

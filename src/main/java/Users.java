@@ -40,7 +40,7 @@ public class Users extends HttpServlet {
                 Document doc = cursor.next();
 
                 User user = new User(
-                        (ObjectId) doc.get("_id"),
+                        doc.get("_id").toString(),
                         doc.get("name").toString(),
                         doc.get("email").toString());
                 users.add(user);

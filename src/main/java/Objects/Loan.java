@@ -1,25 +1,19 @@
 package Objects;
 
-import org.bson.types.ObjectId;
-
 import java.util.Date;
 
-public class Book {
+public class Loan {
     private String Id;
     private String BookTitle;
     private String Author;
-    private String ISBN;
-    private Number Pages;
-    private Date Added;
+    private String CustomerName;
     private boolean OnLoan;
 
-    public Book(String id, String title, String author, String isbn, Number pages, Date added, boolean onLoan) {
+    public Loan(String id, String title, String author, String customerName, boolean onLoan) {
         Id = id;
         BookTitle = title;
         Author = author;
-        ISBN = isbn;
-        Pages = pages;
-        Added = added;
+        CustomerName = customerName;
         OnLoan = onLoan;
     }
 
