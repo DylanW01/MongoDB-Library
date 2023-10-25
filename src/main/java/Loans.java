@@ -2,6 +2,7 @@ import EJB.LoanBean;
 import EJB.BookBean;
 import Objects.Loan;
 import com.google.gson.Gson;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import jakarta.ejb.EJB;
@@ -31,30 +32,16 @@ public class Loans extends HttpServlet {
         response.setContentType("application/json");
 
         PrintWriter out = response.getWriter();
-        FindIterable<Document> foundLoans = loanBean.getActiveLoans();
-        MongoCursor<Document> cursor = foundLoans.iterator();
+        AggregateIterable<Document> result = loanBean.getLoans();
 
-        List<Loan> loans = new ArrayList<Loan>();
+        // Iterate through the aggregateIterable and store the documents in a list
+        List<Document> documents = new ArrayList<>();
+        result.into(documents);
 
-        try {
-            while (cursor.hasNext()) {
-                Document doc = cursor.next();
+        // Convert the list of documents to a JSON array
+        String jsonArray = documents.toString();
 
-                Loan loan = new Loan(
-                        doc.get("_id").toString(),
-                        doc.get("Title").toString(),
-                        doc.get("Author").toString(),
-                        doc.get("CustomerName").toString(),
-                        (Boolean) doc.get("OnLoan"));
-
-                loans.add(loan);
-            }
-        } finally {
-            cursor.close();
-        }
-
-        String loansJsonString = new Gson().toJson(loans);
-        out.print(loansJsonString);
+        out.print(jsonArray);
         out.flush();
     }
 
