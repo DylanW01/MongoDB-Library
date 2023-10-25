@@ -53,7 +53,6 @@ public class LoanBean {
                 Aggregates.unwind("$userData"),
                 Aggregates.project(
                         Projections.fields(
-                                Projections.excludeId(),
                                 Projections.include("returned"), // Include loan-specific fields
                                 Projections.computed("bookData.Title", "$bookData.Title"), // Include book title
                                 Projections.computed("bookData.Author", "$bookData.Author"),
@@ -89,7 +88,6 @@ public class LoanBean {
                 Aggregates.unwind("$userData"),
                 Aggregates.project(
                         Projections.fields(
-                                Projections.excludeId(),
                                 Projections.include("returned"), // Include loan-specific fields
                                 Projections.computed("bookData.Title", "$bookData.Title"), // Include book title
                                 Projections.computed("bookData.Author", "$bookData.Author"),
@@ -97,6 +95,36 @@ public class LoanBean {
                                 Projections.computed("userData.email", "userData.email"),
                                 Projections.computed("userData.name", "userData.name")
                                 // Add more projections as needed
+                        )
+                )
+        );
+
+        // Execute the aggregation and return the result as an AggregateIterable<Document>
+        return loans.aggregate(pipeline);
+    }
+
+    public AggregateIterable<Document> geLoanReportForCustomer(String customerId) {
+        // Client
+        MongoClient mongo = mongoClientProviderBean.getMongoClient();
+        // Get DB
+        MongoDatabase db = mongo.getDatabase("library");
+        // Get loans
+        MongoCollection<Document> loans = db.getCollection("loans");
+        MongoCollection<Document> books = db.getCollection("books");
+        MongoCollection<Document> users = db.getCollection("users");
+
+        // Create an aggregation pipeline to join the "loans", "users" and "books" collections
+        List<Bson> pipeline = Arrays.asList(
+                Aggregates.match(Filters.eq("user_id", customerId)), // Filter loans by customer ID
+                Aggregates.lookup("books", "book_id", "_id", "bookData"),
+
+                Aggregates.unwind("$bookData"),
+                Aggregates.project(
+                        Projections.fields(
+                                Projections.include("returned"), // Include loan-specific fields
+                                Projections.computed("bookData.Title", "$bookData.Title"), // Include book title
+                                Projections.computed("bookData.Author", "$bookData.Author"),
+                                Projections.computed("bookData.OnLoan", "$bookData.OnLoan")
                         )
                 )
         );
