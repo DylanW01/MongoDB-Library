@@ -1,10 +1,7 @@
 import EJB.LoanBean;
 import EJB.BookBean;
-import Objects.Loan;
 import com.google.gson.Gson;
 import com.mongodb.client.AggregateIterable;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCursor;
 import jakarta.ejb.EJB;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,7 +14,6 @@ import org.bson.types.ObjectId;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @WebServlet(name = "Loans", value = "/loans")
@@ -39,8 +35,6 @@ public class Loans extends HttpServlet {
         result.into(documents);
 
         // Convert the list of documents to a JSON array
-        //String jsonArray = documents.toString();
-
         Gson gson = new Gson();
         String jsonArray = gson.toJson(documents);
 
