@@ -39,7 +39,10 @@ public class Loans extends HttpServlet {
         result.into(documents);
 
         // Convert the list of documents to a JSON array
-        String jsonArray = documents.toString();
+        //String jsonArray = documents.toString();
+
+        Gson gson = new Gson();
+        String jsonArray = gson.toJson(documents);
 
         out.print(jsonArray);
         out.flush();
