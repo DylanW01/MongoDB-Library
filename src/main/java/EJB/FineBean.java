@@ -57,6 +57,7 @@ public class FineBean {
                                 Projections.include("paid"),
                                 Projections.include("fine_amount"),
                                 Projections.include("fine_date"),
+                                Projections.computed("id", new Document("$toString", "$_id")), // Convert _id to a string
                                 Projections.computed("bookData.Title", "$bookData.Title"), // Include book title
                                 Projections.computed("bookData.Author", "$bookData.Author"),
                                 Projections.computed("userData.email", "$userData.email"),
