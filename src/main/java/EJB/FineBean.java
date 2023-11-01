@@ -32,26 +32,85 @@ public class FineBean {
         // Insert Customer
         collection.insertOne(fine);
     }
-    public FindIterable<Document> getFines() {
+    public AggregateIterable<Document> getFines() {
         // Client
         MongoClient mongo = mongoClientProviderBean.getMongoClient();
         // Get DB
         MongoDatabase db = mongo.getDatabase("library");
-        // Get users
+        // Get loans
         MongoCollection<Document> fines = db.getCollection("fines");
-        FindIterable<Document> foundFines = fines.find();
-        return foundFines;
+        MongoCollection<Document> loans = db.getCollection("loans");
+        MongoCollection<Document> books = db.getCollection("books");
+        MongoCollection<Document> users = db.getCollection("users");
+
+        // Create an aggregation pipeline to join the "loans", "users" and "books" collections
+        List<Bson> pipeline = Arrays.asList(
+                Aggregates.lookup("books", "book_id", "_id", "bookData"),
+                Aggregates.lookup("loans", "loan_id", "_id", "loanData"),
+                Aggregates.lookup("users", "user_id", "_id", "userData"),
+
+                Aggregates.unwind("$bookData"),
+                Aggregates.unwind("$loanData"),
+                Aggregates.unwind("$userData"),
+                Aggregates.project(
+                        Projections.fields(
+                                Projections.include("paid"),
+                                Projections.include("fine_amount"),
+                                Projections.include("fine_date"),
+                                Projections.computed("bookData.Title", "$bookData.Title"), // Include book title
+                                Projections.computed("bookData.Author", "$bookData.Author"),
+                                Projections.computed("userData.email", "$userData.email"),
+                                Projections.computed("userData.name", "$userData.name"),
+                                Projections.computed("loanData.returned", "$loanData.returned"),
+                                Projections.computed("loanData.return_date", "$loanData.return_date"),
+                                Projections.computed("loanData.return_by", "$loanData.return_by")
+                                // Add more projections as needed
+                        )
+                )
+        );
+        // Execute the aggregation and return the result as an AggregateIterable<Document>
+        return fines.aggregate(pipeline);
     }
 
-    public FindIterable<Document> getUnpaidFines() {
+    public AggregateIterable<Document> getUnpaidFines() {
         // Client
         MongoClient mongo = mongoClientProviderBean.getMongoClient();
         // Get DB
         MongoDatabase db = mongo.getDatabase("library");
-        // Get users
+        // Get loans
         MongoCollection<Document> fines = db.getCollection("fines");
-        FindIterable<Document> foundFines = fines.find(eq("paid", false));
-        return foundFines;
+        MongoCollection<Document> loans = db.getCollection("loans");
+        MongoCollection<Document> books = db.getCollection("books");
+        MongoCollection<Document> users = db.getCollection("users");
+
+        // Create an aggregation pipeline to join the "loans", "users" and "books" collections
+        List<Bson> pipeline = Arrays.asList(
+                Aggregates.match(Filters.eq("paid", false)), // Filter loans by customer ID
+                Aggregates.lookup("books", "book_id", "_id", "bookData"),
+                Aggregates.lookup("loans", "loan_id", "_id", "loanData"),
+                Aggregates.lookup("users", "user_id", "_id", "userData"),
+
+                Aggregates.unwind("$bookData"),
+                Aggregates.unwind("$loanData"),
+                Aggregates.unwind("$userData"),
+                Aggregates.project(
+                        Projections.fields(
+                                Projections.include("paid"),
+                                Projections.include("fine_amount"),
+                                Projections.include("fine_date"),
+                                Projections.computed("bookData.Title", "$bookData.Title"), // Include book title
+                                Projections.computed("bookData.Author", "$bookData.Author"),
+                                Projections.computed("userData.email", "$userData.email"),
+                                Projections.computed("userData.name", "$userData.name"),
+                                Projections.computed("loanData.returned", "$loanData.returned"),
+                                Projections.computed("loanData.return_date", "$loanData.return_date"),
+                                Projections.computed("loanData.return_by", "$loanData.return_by")
+                                // Add more projections as needed
+                        )
+                )
+        );
+        // Execute the aggregation and return the result as an AggregateIterable<Document>
+        return fines.aggregate(pipeline);
     }
 
     public void checkIssueFine(ObjectId loanId) {

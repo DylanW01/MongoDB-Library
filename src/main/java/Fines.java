@@ -2,6 +2,7 @@ import EJB.FineBean;
 import Objects.Fine;
 import Objects.User;
 import com.google.gson.Gson;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import jakarta.ejb.EJB;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@WebServlet(name = "Books", value = "/users")
+@WebServlet(name = "Fines", value = "/fines")
 public class Fines extends HttpServlet {
     @EJB
     FineBean fineBean;
@@ -29,28 +30,18 @@ public class Fines extends HttpServlet {
         response.setContentType("application/json");
 
         PrintWriter out = response.getWriter();
-        FindIterable<Document> foundFines = fineBean.getFines();
-        MongoCursor<Document> cursor = foundFines.iterator();
-/*
-        List<Fine> fines = new ArrayList<Fine>();
+        AggregateIterable<Document> result = fineBean.getFines();
 
-        try {
-            while (cursor.hasNext()) {
-                Document doc = cursor.next();
+        // Iterate through the aggregateIterable and store the documents in a list
+        List<Document> documents = new ArrayList<>();
+        result.into(documents);
 
-                Fine fine = new Fine(
-                        (ObjectId) doc.get("_id"),
-                        doc.get("name").toString(),
-                        doc.get("email").toString());
-                fines.add(fine);
-            }
-        } finally {
-            cursor.close();
-        }
+        // Convert the list of documents to a JSON array
+        Gson gson = new Gson();
+        String jsonArray = gson.toJson(documents);
 
-        String usersJsonString = new Gson().toJson(fines);
-        out.print(usersJsonString);
-        out.flush();*/
+        out.print(jsonArray);
+        out.flush();
     }
 
     @Override

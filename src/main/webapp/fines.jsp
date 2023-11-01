@@ -8,6 +8,35 @@
     <!-- Custom styles for bootstrap template-->
     <link href="./Assets/css/sb-admin-2.min.css" rel="stylesheet">
     <title>Library - Fines</title>
+    <script>
+        fetch("http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/fines").then(
+            res => {
+                res.json().then(
+                    data => {
+                        console.log(data);
+                        if (data.length > 0) {
+                            var temp = "";
+                            data.forEach((itemData) => {
+                                temp += "<tr>";
+                                temp += "<td>" + itemData.id + "</td>";
+                                temp += "<td>" + itemData.fine_amount + "</td>";
+                                temp += "<td>" + itemData.fine_date + "</td>";
+                                temp += "<td>" + itemData.paid + "</td>";
+                                temp += "<td>" + itemData.bookData.Title + "</td>";
+                                temp += "<td>" + itemData.bookData.Author + "</td>";
+                                temp += "<td>" + itemData.loanData.return_by + "</td>";
+                                temp += "<td>" + itemData.loanData.return_date + "</td>";
+                                temp += "<td>" + itemData.userData.name + "</td>";
+
+                            });
+                            document.getElementById('data').innerHTML = temp;
+                            $('#dataTable').DataTable();
+                        }
+                    }
+                )
+            }
+        )
+    </script>
 </head>
 <body id="page-top">
 
@@ -31,43 +60,31 @@
                             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                 <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>Fine ID</th>
+                                    <th>Cost</th>
+                                    <th>Issue Date</th>
+                                    <th>Paid?</th>
+                                    <th>Book Title</th>
+                                    <th>Book Author</th>
+                                    <th>Loan Due</th>
+                                    <th>Book Returned On</th>
                                     <th>Customer Name</th>
-                                    <th>Customer Email</th>
-                                    <th>Objects.Book</th>
-                                    <th>Amount</th>
-                                    <th>Paid</th>
                                 </tr>
                                 </thead>
                                 <tfoot>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>Fine ID</th>
+                                    <th>Cost</th>
+                                    <th>Issue Date</th>
+                                    <th>Paid?</th>
+                                    <th>Book Title</th>
+                                    <th>Book Author</th>
+                                    <th>Loan Due</th>
+                                    <th>Book Returned On</th>
                                     <th>Customer Name</th>
-                                    <th>Customer Email</th>
-                                    <th>Objects.Book</th>
-                                    <th>Amount</th>
-                                    <th>Paid</th>
                                 </tr>
                                 </tfoot>
-                                <tbody>
-                                <tr>
-                                    <td>Tiger Nixon</td>
-                                    <td>System Architect</td>
-                                    <td>Edinburgh</td>
-                                    <td>61</td>
-                                </tr>
-                                <tr>
-                                    <td>Garrett Winters</td>
-                                    <td>Accountant</td>
-                                    <td>Tokyo</td>
-                                    <td>63</td>
-                                </tr>
-                                <tr>
-                                    <td>Ashton Cox</td>
-                                    <td>Junior Technical Author</td>
-                                    <td>San Francisco</td>
-                                    <td>66</td>
-                                </tr>
+                                <tbody id="data">
                                 </tbody>
                             </table>
                         </div>
