@@ -9,7 +9,17 @@
     <link href="./Assets/css/sb-admin-2.min.css" rel="stylesheet">
     <title>Library - Unpaid Fines</title>
     <script>
-        fetch("http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/fines").then(
+        function payFine(fineId) {
+            //alert("Book returned. Refresh page to see updates.");
+            const body = {
+                fineId: fineId
+            };
+            $.post("http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/fines", body, (data, status) => {
+                console.log(data);
+                location.reload();
+            });
+        }
+        fetch("http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/unpaidFines").then(
             res => {
                 res.json().then(
                     data => {

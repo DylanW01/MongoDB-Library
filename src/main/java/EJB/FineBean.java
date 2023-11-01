@@ -99,6 +99,7 @@ public class FineBean {
                                 Projections.include("paid"),
                                 Projections.include("fine_amount"),
                                 Projections.include("fine_date"),
+                                Projections.computed("id", new Document("$toString", "$_id")), // Convert _id to a string
                                 Projections.computed("bookData.Title", "$bookData.Title"), // Include book title
                                 Projections.computed("bookData.Author", "$bookData.Author"),
                                 Projections.computed("userData.email", "$userData.email"),
@@ -179,5 +180,16 @@ public class FineBean {
         } else {
             System.out.println("No matching document found.");
         }
+    }
+
+    public void markAsPaid(String fineId) {
+        MongoClient mongo = mongoClientProviderBean.getMongoClient();
+        MongoDatabase db = mongo.getDatabase("library");
+        MongoCollection<Document> fines = db.getCollection("fines");
+
+        Document filter = new Document("_id", new ObjectId(fineId));
+        Document update = new Document("$set", new Document("paid", true));
+
+        fines.updateOne(filter, update);
     }
 }
