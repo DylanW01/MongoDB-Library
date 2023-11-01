@@ -10,6 +10,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -89,23 +90,25 @@ public class FineBean {
         if (loan != null) {
             Date returnBy = loan.getDate("return_by");
             Date returnDate = loan.getDate("return_date");
-            String userId = loan.getString("userData.id");
-            String bookId = loan.getString("bookData.id");
+            String userId = loan.get("userData", Document.class).getString("id");
+            String bookId = loan.get("bookData", Document.class).getString("id");
 
+            Instant returnByInstant = returnBy.toInstant();
+            Instant returnDateInstant = returnDate.toInstant();
             // Check due date
-            if (returnBy != null && returnBy.after(returnDate)) {
+            if (returnDateInstant.isAfter(returnByInstant)) {
                 // Issue fine
 
                 // Calculate the time difference in milliseconds
-                long timeDifference = returnBy.getTime() - returnDate.getTime();
+                long timeDifference = returnDate.getTime() - returnBy.getTime();
                 // Calculate the number of days
                 int daysDifference = (int) (timeDifference / (1000 * 60 * 60 * 24));
                 // Calculate the fine cost
                 double fineCost = 2.5 * daysDifference;
 
                 Document fine = new Document()
-                        .append("user_id", userId)
-                        .append("book_id", bookId)
+                        .append("user_id", new ObjectId(userId))
+                        .append("book_id", new ObjectId(bookId))
                         .append("fine_amount", fineCost)
                         .append("fine_date", new Date())
                         .append("paid", false)
