@@ -1,5 +1,6 @@
-import EJB.LoanBean;
 import EJB.BookBean;
+import EJB.LoanBean;
+import EJB.FineBean;
 import com.google.gson.Gson;
 import com.mongodb.client.AggregateIterable;
 import jakarta.ejb.EJB;
@@ -14,23 +15,23 @@ import org.bson.types.ObjectId;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
-@WebServlet(name = "Loans", value = "/loans")
-public class Loans extends HttpServlet {
+@WebServlet(name = "Return", value = "/return")
+public class Return extends HttpServlet {
     @EJB
     LoanBean loanBean;
     @EJB
     BookBean bookBean;
+    @EJB
+    FineBean fineBean;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
 
         PrintWriter out = response.getWriter();
-        AggregateIterable<Document> result = loanBean.getLoans();
+        AggregateIterable<Document> result = loanBean.getActiveLoans();
 
         // Iterate through the aggregateIterable and store the documents in a list
         List<Document> documents = new ArrayList<>();
@@ -49,26 +50,17 @@ public class Loans extends HttpServlet {
         response.setContentType("text/html");
 
         PrintWriter out = response.getWriter();
-        out.println("Loan Created. <a href=\"http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/newloan.jsp\">Click Here</a> to go back");
-        ObjectId userId = new ObjectId(request.getParameter("users"));
-        ObjectId bookId = new ObjectId(request.getParameter("books"));
+        out.println("Book Returned. <a href=\"http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/newloan.jsp\">Click Here</a> to go back");
+        ObjectId loanId = new ObjectId(request.getParameter("loanId"));
+        String bookId = request.getParameter("bookId");
 
-        Date currentDate = new Date();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(currentDate);
+        // Mark loan as returned
+        loanBean.returnBook(loanId);
 
-        calendar.add(Calendar.DAY_OF_MONTH, 14);
+        // Get loan details, check due date & issue fine if needed
+        fineBean.checkIssueFine(loanId);
 
-        Date dateAfterTwoWeeks = calendar.getTime();
-
-        Document loan = new Document()
-                .append("user_id", userId)
-                .append("book_id", bookId)
-                .append("return_by", dateAfterTwoWeeks)
-                .append("return_date", null)
-                .append("returned", false);
-
-        loanBean.createLoan(loan);
-        bookBean.markAsBorrowed(request.getParameter("books"));
+        // Mark book as returned
+        bookBean.markAsReturned(bookId);
     }
 }

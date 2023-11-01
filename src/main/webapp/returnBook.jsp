@@ -4,30 +4,37 @@
 <head>
     <link href="./Assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.2/jquery.min.js" integrity="sha512-tWHlutFnuG0C6nQRlpvrEhE4QpkG1nn2MOUMWmUeRePl4e3Aki0VB6W1v3oLjFtd0hVOtRQ9PHpSfN6u6/QXkQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!-- Custom styles for bootstrap template-->
     <link href="./Assets/css/sb-admin-2.min.css" rel="stylesheet">
     <title>Library - Loans</title>
     <!-- Get Books -->
     <script>
-        function returnBook() {
-            alert("Book returned. Refresh page to see updates.");
+        function returnBook(loanId, bookId) {
+            //alert("Book returned. Refresh page to see updates.");
+            const body = {
+                loanId: loanId,
+                bookId: bookId
+            };
+            $.post("http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/return", body, (data, status) => {
+                console.log(data);
+                location.reload();
+            });
         }
-        fetch("http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/loans").then(
+        fetch("http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/return").then(
             res => {
                 res.json().then(
                     data => {
                         console.log(data);
                         if (data.length > 0) {
-
                             var temp = "";
                             data.forEach((itemData) => {
                                 temp += "<tr>";
-                                temp += "<td>" + itemData.LoanId + "</td>";
-                                temp += "<td>" + itemData.BookTitle + "</td>";
-                                temp += "<td>" + itemData.Author + "</td>";
-                                temp += "<td>" + itemData.CustomerName + "</td>";
-                                temp += "<td><button onclick='returnBook("+itemData.loanID+")'>Return Book</button></td>";
+                                temp += "<td>" + itemData.id + "</td>";
+                                temp += "<td>" + itemData.bookData.Title + "</td>";
+                                temp += "<td>" + itemData.bookData.Author + "</td>";
+                                temp += "<td>" + itemData.userData.name + "</td>";
+                                temp += `<td><button onclick="returnBook('`+itemData.id+`','`+itemData.bookData.id+`')">Return Book</button></td>`;
                             });
                             document.getElementById('data').innerHTML = temp;
                             $('#dataTable').DataTable();

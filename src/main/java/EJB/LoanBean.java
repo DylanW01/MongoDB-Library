@@ -11,8 +11,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Aggregates;
-import org.bson.Document;
+import java.util.Date;
 import com.mongodb.client.model.Projections;
+import org.bson.types.ObjectId;
 
 import java.util.Arrays;
 import java.util.List;
@@ -60,7 +61,9 @@ public class LoanBean {
                                 Projections.computed("bookData.Pages", "$bookData.Pages"),
                                 Projections.computed("bookData.Added", "$bookData.Added"),
                                 Projections.computed("userData.email", "$userData.email"),
-                                Projections.computed("userData.name", "$userData.name")
+                                Projections.computed("userData.name", "$userData.name"),
+                                Projections.computed("id", new Document("$toString", "$_id")), // Convert _id to a string
+                                Projections.computed("bookData.id", new Document("$toString", "$bookData._id")) // Convert _id to a string
                                 // Add more projections as needed
                         )
                 )
@@ -97,7 +100,9 @@ public class LoanBean {
                                 Projections.computed("bookData.Pages", "$bookData.Pages"),
                                 Projections.computed("bookData.Added", "$bookData.Added"),
                                 Projections.computed("userData.email", "$userData.email"),
-                                Projections.computed("userData.name", "$userData.name")
+                                Projections.computed("userData.name", "$userData.name"),
+                                Projections.computed("id", new Document("$toString", "$_id")), // Convert _id to a string
+                                Projections.computed("bookData.id", new Document("$toString", "$bookData._id")) // Convert _id to a string
                                 // Add more projections as needed
                         )
                 )
@@ -139,8 +144,21 @@ public class LoanBean {
                         )
                 )
         );
-
-        // Execute the aggregation and return the result as an AggregateIterable<Document>
+            // Execute the aggregation and return the result as an AggregateIterable<Document>
         return loans.aggregate(pipeline);
+    }
+
+    public void returnBook(ObjectId loanId) {
+        MongoClient mongo = mongoClientProviderBean.getMongoClient();
+        MongoDatabase db = mongo.getDatabase("library");
+        MongoCollection<Document> books = db.getCollection("loans");
+        MongoCollection<Document> fines = db.getCollection("fines");
+
+        Document filter = new Document("_id", loanId);
+        Date currentDate = new Date();
+        Document update = new Document("$set", new Document("returned", true)
+                .append("return_date", currentDate));
+
+        books.updateOne(filter, update);
     }
 }
