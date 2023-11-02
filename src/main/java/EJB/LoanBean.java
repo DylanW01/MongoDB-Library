@@ -112,7 +112,7 @@ public class LoanBean {
         return loans.aggregate(pipeline);
     }
 
-    public AggregateIterable<Document> geLoanReportForCustomer(ObjectId customerId) {
+    public AggregateIterable<Document> geLoanReportForCustomer(ObjectId customerId, Date startDate, Date endDate) {
         // Client
         MongoClient mongo = mongoClientProviderBean.getMongoClient();
         // Get DB
@@ -122,9 +122,18 @@ public class LoanBean {
         MongoCollection<Document> books = db.getCollection("books");
         MongoCollection<Document> users = db.getCollection("users");
 
+
+        Bson matchStage = Aggregates.match(
+                Filters.and(
+                        Filters.eq("user_id", customerId), // Filter loans by customer ID
+                        Filters.gte("return_by", startDate), // Filter return_by >= startDate
+                        Filters.lte("return_by", endDate)  // Filter return_by <= endDate
+                )
+        );
+
         // Create an aggregation pipeline to join the "loans", "users" and "books" collections
         List<Bson> pipeline = Arrays.asList(
-                Aggregates.match(Filters.eq("user_id", customerId)), // Filter loans by customer ID
+                matchStage,
                 Aggregates.lookup("books", "book_id", "_id", "bookData"),
                 Aggregates.lookup("users", "user_id", "_id", "userData"),
 

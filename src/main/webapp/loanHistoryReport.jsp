@@ -47,10 +47,13 @@
                         </div>
                         <div class="card-body">
                             <form>
-                                Select a user from the list and click "view loans" to update chart and table data.
+                                Select a user from the list and click "view loans" to update chart and table data. Records are filtered by the month they are due to be returned.
                                 <div class="form-group">
                                     <select required name="users" id="users">
                                     </select>
+                                </div>
+                                <div class="form-group">
+                                    <input type="month" id="monthFilter" name="monthFilter">
                                 </div>
                                 <button id="submitbtn" type="button" style="width: 25%" class="btn btn-primary btn-block">
                                     View Report
@@ -157,28 +160,28 @@
     });
     document.getElementById("submitbtn").addEventListener("click", function() {
         const customerId = document.getElementById("users").value
-        fetch(`http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/loan-report?id=`+customerId).then(
+        const date = document.getElementById("monthFilter").value
+        fetch(`http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/loan-report?id=`+customerId+`&date=`+date).then(
             res => {
                 res.json().then(
                     data => {
-                        if (data.length > 0) {
-                            var temp = "";
-                            var returnedCount = 0;
-                            data.forEach((itemData) => {
-                                temp += "<tr>";
-                                temp += "<td>" + itemData.id + "</td>";
-                                temp += "<td>" + itemData.returned + "</td>";
-                                temp += "<td>" + itemData.bookData.Title +" ("+itemData.bookData.Title+")"+ "</td>";
-                                temp += "<td>" + itemData.return_by + "</td>";
-                                temp += "<td>" + itemData.return_date + "</td>";
-                                if (itemData.returned === false) {
-                                    returnedCount++; // Increment the counter if 'returned' is false
-                                }
-                            });
-                            chart.series[0].setData([['Non-Returned', data.length-returnedCount],['Returned', returnedCount]]);
-                            document.getElementById('loan-data').innerHTML = temp;
-                            $('#dataTable').DataTable();
-                        }
+                        var temp = "";
+                        var returnedCount = 0;
+                        data.forEach((itemData) => {
+                            temp += "<tr>";
+                            temp += "<td>" + itemData.id + "</td>";
+                            temp += "<td>" + itemData.returned + "</td>";
+                            temp += "<td>" + itemData.bookData.Title +" ("+itemData.bookData.Title+")"+ "</td>";
+                            temp += "<td>" + itemData.return_by + "</td>";
+                            temp += "<td>" + itemData.return_date + "</td>";
+                            if (itemData.returned === false) {
+                                returnedCount++; // Increment the counter if 'returned' is false
+                            }
+                        });
+                        chart.series[0].setData([['Non-Returned', data.length-returnedCount],['Returned', returnedCount]]);
+                        document.getElementById('loan-data').innerHTML = temp;
+                        $('#dataTable').DataTable();
+
                     }
                 )
             }
