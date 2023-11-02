@@ -112,7 +112,7 @@ public class LoanBean {
         return loans.aggregate(pipeline);
     }
 
-    public AggregateIterable<Document> geLoanReportForCustomer(String customerId) {
+    public AggregateIterable<Document> geLoanReportForCustomer(ObjectId customerId) {
         // Client
         MongoClient mongo = mongoClientProviderBean.getMongoClient();
         // Get DB
@@ -133,6 +133,9 @@ public class LoanBean {
                 Aggregates.project(
                         Projections.fields(
                                 Projections.include("returned"), // Include loan-specific fields
+                                Projections.include("return_by"),
+                                Projections.include("return_date"),
+                                Projections.computed("id", new Document("$toString", "$_id")), // Convert _id to a string
                                 Projections.computed("bookData.Title", "$bookData.Title"), // Include book title
                                 Projections.computed("bookData.Author", "$bookData.Author"),
                                 Projections.computed("bookData.ISBN", "$bookData.ISBN"),

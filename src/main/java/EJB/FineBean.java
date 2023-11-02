@@ -192,4 +192,37 @@ public class FineBean {
 
         fines.updateOne(filter, update);
     }
+
+    public AggregateIterable<Document> geFineReportForCustomer(ObjectId customerId) {
+        // Client
+        MongoClient mongo = mongoClientProviderBean.getMongoClient();
+        // Get DB
+        MongoDatabase db = mongo.getDatabase("library");
+        // Get loans
+        MongoCollection<Document> fines = db.getCollection("fines");
+        MongoCollection<Document> loans = db.getCollection("loans");
+        MongoCollection<Document> books = db.getCollection("books");
+        MongoCollection<Document> users = db.getCollection("users");
+
+        List<Bson> pipeline = Arrays.asList(
+                Aggregates.match(Filters.eq("user_id", customerId)), // Filter loans by customer ID
+                Aggregates.lookup("books", "book_id", "_id", "bookData"),
+                Aggregates.lookup("users", "user_id", "_id", "userData"),
+
+                Aggregates.unwind("$bookData"),
+                Aggregates.unwind("$userData"),
+                Aggregates.project(
+                        Projections.fields(
+                                Projections.include("paid"), // Include loan-specific fields
+                                Projections.include("fine_amount"),
+                                Projections.include("fine_date"),
+                                Projections.computed("id", new Document("$toString", "$_id")), // Convert _id to a string
+                                Projections.computed("bookData.Title", "$bookData.Title"), // Include book title
+                                Projections.computed("bookData.Author", "$bookData.Author")
+                        )
+                )
+        );
+        // Execute the aggregation and return the result as an AggregateIterable<Document>
+        return fines.aggregate(pipeline);
+    }
 }
