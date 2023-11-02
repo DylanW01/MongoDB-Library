@@ -193,7 +193,7 @@ public class FineBean {
         fines.updateOne(filter, update);
     }
 
-    public AggregateIterable<Document> geFineReportForCustomer(ObjectId customerId) {
+    public AggregateIterable<Document> geFineReportForCustomer(ObjectId customerId, Date startDate, Date endDate) {
         // Client
         MongoClient mongo = mongoClientProviderBean.getMongoClient();
         // Get DB
@@ -204,8 +204,16 @@ public class FineBean {
         MongoCollection<Document> books = db.getCollection("books");
         MongoCollection<Document> users = db.getCollection("users");
 
+        Bson matchStage = Aggregates.match(
+                Filters.and(
+                        Filters.eq("user_id", customerId), // Filter loans by customer ID
+                        Filters.gte("fine_date", startDate), // Filter fine_date >= startDate
+                        Filters.lte("fine_date", endDate)  // Filter fine_date <= endDate
+                )
+        );
+
         List<Bson> pipeline = Arrays.asList(
-                Aggregates.match(Filters.eq("user_id", customerId)), // Filter loans by customer ID
+                matchStage,
                 Aggregates.lookup("books", "book_id", "_id", "bookData"),
                 Aggregates.lookup("users", "user_id", "_id", "userData"),
 

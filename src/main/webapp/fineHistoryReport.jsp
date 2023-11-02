@@ -52,6 +52,9 @@
                                     <select required name="users" id="users">
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <input type="month" id="monthFilter" name="monthFilter">
+                                </div>
                                 <button id="submitbtn" type="button" style="width: 25%" class="btn btn-primary btn-block">
                                     View Report
                                 </button>
@@ -80,6 +83,7 @@
                                         <thead>
                                         <tr>
                                             <th>Fine ID</th>
+                                            <th>Issue Date</th>
                                             <th>Paid?</th>
                                             <th>Amount</th>
                                             <th>Book</th>
@@ -90,6 +94,7 @@
                                         <tfoot>
                                         <tr>
                                             <th>Fine ID</th>
+                                            <th>Issue Date</th>
                                             <th>Paid?</th>
                                             <th>Amount</th>
                                             <th>Book</th>
@@ -155,27 +160,28 @@
     });
     document.getElementById("submitbtn").addEventListener("click", function() {
         const customerId = document.getElementById("users").value
-        fetch(`http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/fine-report?id=`+customerId).then(
+        const date = document.getElementById("monthFilter").value
+        fetch(`http://localhost:8080/MongoDB-Library-1.0-SNAPSHOT/fine-report?id=`+customerId+`&date=`+date).then(
             res => {
                 res.json().then(
                     data => {
-                        if (data.length > 0) {
-                            var temp = "";
-                            var paidCount = 0;
-                            data.forEach((itemData) => {
-                                temp += "<tr>";
-                                temp += "<td>" + itemData.id + "</td>";
-                                temp += "<td>" + itemData.paid + "</td>";
-                                temp += "<td>£" + itemData.fine_amount + "</td>";
-                                temp += "<td>" + itemData.bookData.Title +" ("+itemData.bookData.Author+")"+ "</td>";
-                                if (itemData.paid === true) {
-                                    paidCount++; // Increment the counter if 'returned' is false
-                                }
-                            });
-                            chart.series[0].setData([['Unpaid', data.length-paidCount],['Paid', paidCount]]);
-                            document.getElementById('fine-data').innerHTML = temp;
-                            $('#dataTable').DataTable();
-                        }
+                        var temp = "";
+                        var paidCount = 0;
+                        data.forEach((itemData) => {
+                            temp += "<tr>";
+                            temp += "<td>" + itemData.id + "</td>";
+                            temp += "<td>" + itemData.fine_date + "</td>";
+                            temp += "<td>" + itemData.paid + "</td>";
+                            temp += "<td>£" + itemData.fine_amount + "</td>";
+                            temp += "<td>" + itemData.bookData.Title +" ("+itemData.bookData.Author+")"+ "</td>";
+                            if (itemData.paid === true) {
+                                paidCount++; // Increment the counter if 'returned' is false
+                            }
+                        });
+                        chart.series[0].setData([['Unpaid', data.length-paidCount],['Paid', paidCount]]);
+                        document.getElementById('fine-data').innerHTML = temp;
+                        $('#dataTable').DataTable();
+
                     }
                 )
             }
